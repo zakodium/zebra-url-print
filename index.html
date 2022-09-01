@@ -1,0 +1,74 @@
+<html>
+  <body>
+    <script>
+      let extensionDetected;
+      window.addEventListener('message', function (event) {
+        if (!event.data.ZebraPrintingVersion) {
+          return;
+        }
+
+        const url = new URL(document.location.href);
+        const host = url.searchParams.get('host');
+        const baseUrl = `http://${host}`;
+        const zpl = url.searchParams.get('zpl');
+
+        extensionDetected = true;
+        if (!host || !zpl) {
+          document.getElementById('root').innerHTML = `
+        <h1>Missing search parameters</h1>
+        You must provide the <pre style="display: inline-block">host</pre> and <pre style="display: inline-block;">zpl</pre> parameters.
+        `;
+          return;
+        }
+
+        function print() {
+          window.postMessage(
+            {
+              type: 'zebra_print_label',
+              zpl,
+              url: `${baseUrl}/pstprnt`,
+            },
+            '*',
+          );
+        }
+
+        print();
+        document.getElementById('root').innerHTML = `
+        <h1>Print job sent</h1>
+        <button id="reprint-button">Reprint</button>
+        <p>Host: <a href="${baseUrl}" target="_blank">${host}</a></p>
+        <code>
+          <pre>${zpl}</pre>
+        </code>
+        `;
+
+        document
+          .getElementById('reprint-button')
+          .addEventListener('click', () => {
+            print();
+          });
+      });
+      setTimeout(() => {
+        if (!extensionDetected) {
+          // Show extension not detected with link
+          // https://chrome.google.com/webstore/detail/zebra-printing/ndikjdigobmbieacjcgomahigeiobhbo?hl=en
+
+          document.getElementById('root').innerHTML = `
+            <div>
+              <h1>Zebra Print Extension not detected</h1>
+              <p>
+                Please install the Zebra Print Extension from the Chrome Webstore.
+              </p>
+              <a href="https://chrome.google.com/webstore/detail/zebra-printing/ndikjdigobmbieacjcgomahigeiobhbo?hl=en">
+                Install Zebra Print Extension
+              </a>
+            </div>
+          `;
+        }
+      }, 3000);
+    </script>
+    <div id="root">
+      <h1>Loading...</h1>
+    </div>
+  </body>
+</html>
