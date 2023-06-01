@@ -3,9 +3,12 @@
     <script>
       function parseUrl(inputUrl) {
         const url = new URL(inputUrl);
-        const host = url.searchParams.get('host');
+        const hashSearchParams = new URLSearchParams(url.hash.slice(1));
+        const host =
+          url.searchParams.get('host') || hashSearchParams.get('host');
         const baseUrl = `http://${host}`;
-        const zpl = url.searchParams.get('zpl');
+        const zpl = url.searchParams.get('zpl') || hashSearchParams.get('zpl');
+
         return { host, baseUrl, zpl };
       }
       let extensionDetected;
