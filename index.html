@@ -1,16 +1,23 @@
 <html>
   <body>
     <script>
+      function parseUrl(inputUrl) {
+        const url = new URL(inputUrl);
+        const hashSearchParams = new URLSearchParams(url.hash.slice(1));
+        const host =
+          url.searchParams.get('host') || hashSearchParams.get('host');
+        const baseUrl = `http://${host}`;
+        const zpl = url.searchParams.get('zpl') || hashSearchParams.get('zpl');
+
+        return { host, baseUrl, zpl };
+      }
       let extensionDetected;
       window.addEventListener('message', function (event) {
         if (!event.data.ZebraPrintingVersion) {
           return;
         }
 
-        const url = new URL(document.location.href);
-        const host = url.searchParams.get('host');
-        const baseUrl = `http://${host}`;
-        const zpl = url.searchParams.get('zpl');
+        const { host, baseUrl, zpl } = parseUrl(document.location.href);
 
         extensionDetected = true;
         if (!host || !zpl) {
